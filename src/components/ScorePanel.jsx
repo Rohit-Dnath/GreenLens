@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Paper, Typography, Box, Grid, LinearProgress, Accordion, AccordionSummary, AccordionDetails, Chip, Skeleton, Alert } from "@mui/material";
-import { GaugeCircle, ChevronDown, Sun as WbSunny, TreePine as Park, Train, Wind, Footprints, Brain } from "lucide-react";
+import { Paper, Typography, Box, Grid, LinearProgress, Accordion, AccordionSummary, AccordionDetails, Chip, Skeleton, Alert, IconButton } from "@mui/material";
+import { GaugeCircle, ChevronDown, Sun as WbSunny, TreePine as Park, Train, Wind, Footprints, Brain, X as CloseIcon } from "lucide-react";
 import { LAYER_TYPES } from "./LayerControlPanel";
 import { formatNumber, formatDistance, getScoreColor, getGradeColor, getGrade, getDistance } from "../utils/scoreUtils";
 import ReactMarkdown from "react-markdown";
+import { Assessment as AssessmentIcon } from "@mui/icons-material";
 
 const SustainabilityScorePanel = ({
   visible,
@@ -16,9 +17,15 @@ const SustainabilityScorePanel = ({
   airQualityData,
   aiInsights,
 }) => {
-  const [expandedPanel, setExpandedPanel] = useState(false);
+  const [expandedPanel, setExpandedPanel] = useState("overall");
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   if (!visible) return null;
+
+  const togglePanelVisibility = () => {
+    setIsPanelVisible(!isPanelVisible);
+    setExpandedPanel(isPanelVisible ? false : "overall");
+  };
 
   const calculateWalkabilityScore = (data) => {
     if (!data) return { score: 0, metrics: {} };
@@ -301,380 +308,393 @@ const SustainabilityScorePanel = ({
   };
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        position: "absolute",
-top: 20,
-right: 20, 
-width: 380,
-maxWidth: "90vw",
-maxHeight: "80vh",
-zIndex: 1000,
-background: "linear-gradient(135deg, rgba(34, 193, 195, 0.95), rgba(253, 187, 45, 0.95))", 
-backdropFilter: "blur(10px)", 
-borderRadius: "16px", 
-boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
-padding: "16px", 
-overflow: "hidden",
-display: "flex",
-outline: "3px solid rgba(34, 193, 195, 0.3)",
-flexDirection: "column",
-border: "1px solid rgba(255, 255, 255, 0.3)", 
-transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth animation
-":hover": {
-  transform: "translateY(-10px)",
-  boxShadow: "0 12px 36px rgba(0, 0, 0, 0.3)", 
-},
-":focus-within": {
-  outline: "2px solid rgba(253, 187, 45, 0.5)", 
-  boxShadow: "0 10px 30px rgba(253, 187, 45, 0.3)", 
-},
-color: "#ffffff", 
-fontWeight: "bold", 
-fontSize: "14px", 
-
-      }}
-    >
-      <Box sx={{ overflow: "auto",  borderRadius: "12px" , }}>
-        <Accordion
-          expanded={expandedPanel === "insights"}
-          onChange={() => setExpandedPanel(expandedPanel === "insights" ? false : "insights")}
-          sx={{ display: "grid",mb: 1,  backgroundColor: "#fffff",   borderRadius: "12px"  }}
+    <>
+      <IconButton
+        onClick={togglePanelVisibility}
+        sx={{
+          position: "absolute",
+          bottom: 20,
+          right: isPanelVisible ? "calc(30vw + 20px)" : 20,
+          zIndex: 1100,
+          backgroundColor: "rgba(34, 193, 195, 0.8)",
+          color: "#ffffff",
+          width: 56,
+          height: 56,
+          "&:hover": {
+            backgroundColor: "rgba(34, 193, 195, 1)",
+          },
+        }}
+      >
+        {isPanelVisible ? <CloseIcon /> : <AssessmentIcon />}
+      </IconButton>
+      {isPanelVisible && (
+        <Paper
+          elevation={3}
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: "30vw",
+            height: "100vh",
+            zIndex: 1000,
+            background: "linear-gradient(135deg, rgba(34, 193, 195, 0.95), rgba(253, 187, 45, 0.95))",
+            backdropFilter: "blur(10px)",
+            borderRadius: "0",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+            padding: "16px",
+            overflow: "hidden",
+            display: "flex",
+            outline: "3px solid rgba(34, 193, 195, 0.3)",
+            flexDirection: "column",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            ":focus-within": {
+              outline: "2px solid rgba(253, 187, 45, 0.5)",
+              boxShadow: "0 10px 30px rgba(253, 187, 45, 0.3)",
+            },
+            color: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "14px",
+          }}
         >
-          <AccordionSummary expandIcon={<ChevronDown />}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%",backdropFilter : "blur(10px)" ,  borderRadius: "12px" }}>
-              <Brain />
-              <Typography>AI-Powered Insights</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            {!aiInsights ? (
-              <Box sx={{ mt: 1 , }}>
-                <Alert severity="info">Activate all layers to unlock AI-driven insights.</Alert>
-              </Box>
-            ) : (
-              <Typography variant="body2" component="div">
-                <ReactMarkdown
-                  components={{
-                    p: (props) => <Typography variant="body2" gutterBottom {...props} />,
-                    h1: (props) => <Typography variant="h5" gutterBottom {...props} />,
-                    h2: (props) => <Typography variant="h6" gutterBottom {...props} />,
-                    h3: (props) => <Typography variant="subtitle1" gutterBottom {...props} />,
-                    ul: (props) => <Box component="ul" sx={{ pl: 2 }} {...props} />,
-                    li: (props) => <Typography variant="body2" component="li" {...props} />,
-                  }}
-                >
-                  {aiInsights}
-                </ReactMarkdown>
-              </Typography>
-            )}
-          </AccordionDetails>
-        </Accordion>
-        <Accordion
-        sx={{ borderRadius: "12px" }}
-          expanded={expandedPanel === "overall"}
-          onChange={() => setExpandedPanel(expandedPanel === "overall" ? false : "overall")}
-          defaultExpanded
-        >
-        
-          <AccordionSummary expandIcon={<ChevronDown />}>
-            <Box sx={{ display: "flex", alignItems: "center",  borderRadius: "12px", gap: 1, width: "100%",  }}>
-              <GaugeCircle />
-              <Typography>Sustainability Score</Typography>
-              <Typography sx={{ ml: "auto",   }}>{Object.values(activeLayers).some(Boolean) ? `${Math.round(totalScore)}/100` : "Disabled"}</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            {}
-            {!Object.values(activeLayers).some(Boolean) ? (
-              <Alert severity="info" sx={{ mb: 2 }}>
-                Enable layers to see sustainability metrics
-              </Alert>
-            ) : (
-              <Box sx={{ mb: 3 }}>
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={4}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        p: 2,
-                        borderRadius: 2,
-                        backgroundColor: `${getGradeColor(grade)}22`,
-                        border: `1px solid ${getGradeColor(grade)}`,
+          <Box sx={{ overflow: "auto", borderRadius: "12px" }}>
+            <Accordion
+              expanded={expandedPanel === "insights"}
+              onChange={() => setExpandedPanel(expandedPanel === "insights" ? false : "insights")}
+              sx={{ display: "grid", mb: 1, backgroundColor: "#fffff", borderRadius: "12px" }}
+            >
+              <AccordionSummary expandIcon={<ChevronDown />}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", backdropFilter: "blur(10px)", borderRadius: "12px" }}>
+                  <Brain />
+                  <Typography>AI-Powered Insights</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                {!aiInsights ? (
+                  <Box sx={{ mt: 1 }}>
+                    <Alert severity="info">Activate all layers to unlock AI-driven insights.</Alert>
+                  </Box>
+                ) : (
+                  <Typography variant="body2" component="div">
+                    <ReactMarkdown
+                      components={{
+                        p: (props) => <Typography variant="body2" gutterBottom {...props} />,
+                        h1: (props) => <Typography variant="h5" gutterBottom {...props} />,
+                        h2: (props) => <Typography variant="h6" gutterBottom {...props} />,
+                        h3: (props) => <Typography variant="subtitle1" gutterBottom {...props} />,
+                        ul: (props) => <Box component="ul" sx={{ pl: 2 }} {...props} />,
+                        li: (props) => <Typography variant="body2" component="li" {...props} />,
                       }}
                     >
-                      <Typography variant="h3" fontWeight="bold" color={getGradeColor(grade)}>
-                        {grade}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Grade
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={8}>
-                    <Typography variant="h4" gutterBottom>
-                      {Math.round(totalScore)}/100
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={totalScore}
-                      sx={{
-                        height: 8,
-                        borderRadius: 1,
-                        backgroundColor: "rgba(0,0,0,0.1)",
-                        "& .MuiLinearProgress-bar": {
-                          backgroundColor: getGradeColor(grade),
-                        },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </Box>
-            )}
-
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Score Breakdown
-              </Typography>
-              <Box sx={{ mb: 2 }}>
-                {Object.entries(layerStates).map(([key, state]) => {
-                  if (!state.isActive) return null;
-                  const maxScore = scoreWeights[key];
-                  const score = state.hasData ? state.score.score : 0;
-                  const contribution = getScoreContribution(score, maxScore);
-
-                  return (
-                    <Box key={key} sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                      <Typography variant="body2">{key.charAt(0).toUpperCase() + key.slice(1)}:</Typography>
-                      <Typography variant="body2">{state.hasData ? `${Math.round(score)}/${maxScore} (${contribution}%)` : "N/A"}</Typography>
-                    </Box>
-                  );
-                })}
-                <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
-                  <Typography variant="body2" fontWeight="bold" sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <span>Total Score:</span>
-                    <span>{Math.round(totalScore)}/100</span>
+                      {aiInsights}
+                    </ReactMarkdown>
                   </Typography>
+                )}
+              </AccordionDetails>
+            </Accordion>
+            <Accordion
+              sx={{ borderRadius: "12px" }}
+              expanded={expandedPanel === "overall"}
+              onChange={() => setExpandedPanel(expandedPanel === "overall" ? false : "overall")}
+              defaultExpanded
+            >
+              <AccordionSummary expandIcon={<ChevronDown />}>
+                <Box sx={{ display: "flex", alignItems: "center", borderRadius: "12px", gap: 1, width: "100%" }}>
+                  <GaugeCircle />
+                  <Typography>Sustainability Score</Typography>
+                  <Typography sx={{ ml: "auto" }}>{Object.values(activeLayers).some(Boolean) ? `${Math.round(totalScore)}/100` : "Disabled"}</Typography>
                 </Box>
-              </Box>
-            </Box>
-            {}
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
-                <Footprints color={getScoreColor(layerStates.walkability.score.score, 30)} />
-                <Typography>Walkability</Typography>
-                <Typography sx={{ ml: "auto" }}>
-                  {layerStates.walkability.isActive
-                    ? layerStates.walkability.hasData
-                      ? renderLayerScore(layerStates.walkability, 30)
-                      : "Loading..."
-                    : "Disabled"}
-                </Typography>
-              </Box>
-              {renderMetricsSection(layerStates.walkability, () => (
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Metrics
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">Total Amenities: {formatNumber(layerStates.walkability.score.metrics.totalAmenities)}</Typography>
-                      <Typography variant="body2">
-                        Average Distance: {formatDistance(layerStates.walkability.score.metrics.averageDistance)}
-                      </Typography>
-                      <Typography variant="body2">Amenity Types: {Object.keys(layerStates.walkability.score.metrics.amenityTypes).length}</Typography>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Score Breakdown
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">Amenities: {layerStates.walkability.score.metrics.scores.amenities}/15</Typography>
-                      <Typography variant="body2">Diversity: {layerStates.walkability.score.metrics.scores.diversity}/10</Typography>
-                      <Typography variant="body2">Proximity: {layerStates.walkability.score.metrics.scores.proximity}/5</Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              ))}
-            </Box>
-            {/* Air Quality Section */}
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
-                <Wind color={getScoreColor(layerStates.airQuality.score.score, 20)} />
-                <Typography>Air Quality</Typography>
-                <Typography sx={{ ml: "auto" }}>
-                  {layerStates.airQuality.isActive
-                    ? layerStates.airQuality.hasData
-                      ? renderLayerScore(layerStates.airQuality, 20)
-                      : "Loading..."
-                    : "Disabled"}
-                </Typography>
-              </Box>
-              {renderMetricsSection(layerStates.airQuality, () => (
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Metrics
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">AQI: {layerStates.airQuality.score.metrics.aqi}</Typography>
-                      <Typography variant="body2">Category: {layerStates.airQuality.score.metrics.category}</Typography>
-                      <Typography variant="body2">Dominant Pollutant: {layerStates.airQuality.score.metrics.dominantPollutant}</Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              ))}
-            </Box>
-            {/* Solar Score Section */}
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
-                <WbSunny color={getScoreColor(layerStates.solar.score.score, 40)} />
-                <Typography>Solar Potential</Typography>
-                <Typography sx={{ ml: "auto" }}>
-                  {layerStates.solar.isActive ? (layerStates.solar.hasData ? renderLayerScore(layerStates.solar, 40) : "Loading...") : "Disabled"}
-                </Typography>
-              </Box>
-              {renderMetricsSection(layerStates.solar, () => (
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Metrics
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">
-                        Average Sunshine: {formatNumber(layerStates.solar.score.metrics.averageSunshine)} kWh/m²/year
-                      </Typography>
-                      <Typography variant="body2">Total Roof Area: {formatNumber(layerStates.solar.score.metrics.totalArea)} m²</Typography>
-                      <Typography variant="body2">
-                        Possible Configurations: {formatNumber(layerStates.solar.score.metrics.possibleConfigurations)}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              ))}
-            </Box>
-            {/* Green Spaces Section */}
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
-                <Park color={getScoreColor(layerStates.greenSpace.score.score, 30)} />
-                <Typography>Green Spaces</Typography>
-                <Typography sx={{ ml: "auto" }}>
-                  {layerStates.greenSpace.isActive
-                    ? layerStates.greenSpace.hasData
-                      ? renderLayerScore(layerStates.greenSpace, 30)
-                      : "Loading..."
-                    : "Disabled"}
-                </Typography>
-              </Box>
-              {renderMetricsSection(layerStates.greenSpace, () => (
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Metrics
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">Number of Spaces: {formatNumber(layerStates.greenSpace.score.metrics.numberOfSpaces)}</Typography>
-                      <Typography variant="body2">
-                        Average Distance: {formatDistance(layerStates.greenSpace.score.metrics.averageDistance)}
-                      </Typography>
-                      <Typography variant="body2">
-                        Average Rating: {(layerStates.greenSpace.score.metrics.averageRating || 0).toFixed(1)} ★
-                      </Typography>
-                      <Typography variant="body2">Total Reviews: {formatNumber(layerStates.greenSpace.score.metrics.totalReviews)}</Typography>
-                      <Typography variant="body2">Large Parks: {layerStates.greenSpace.score.metrics.hasLargeParks ? "Yes" : "No"}</Typography>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Score Breakdown
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">Quantity: {layerStates.greenSpace.score.metrics.scores.quantity}/10</Typography>
-                      <Typography variant="body2">Proximity: {layerStates.greenSpace.score.metrics.scores.proximity}/10</Typography>
-                      <Typography variant="body2">Quality: {layerStates.greenSpace.score.metrics.scores.quality}/10</Typography>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Park Types
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      {Object.entries(layerStates.greenSpace.score.metrics.parkTypes || {}).map(([type, count]) => (
-                        <Chip
-                          key={type}
-                          label={`${type.replace("_", " ")}: ${count}`}
-                          size="small"
+              </AccordionSummary>
+              <AccordionDetails>
+                {!Object.values(activeLayers).some(Boolean) ? (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Enable layers to see sustainability metrics
+                  </Alert>
+                ) : (
+                  <Box sx={{ mb: 3 }}>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={4}>
+                        <Box
                           sx={{
-                            mr: 0.5,
-                            mb: 0.5,
-                            textTransform: "capitalize",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            p: 2,
+                            borderRadius: 2,
+                            backgroundColor: `${getGradeColor(grade)}22`,
+                            border: `1px solid ${getGradeColor(grade)}`,
+                          }}
+                        >
+                          <Typography variant="h3" fontWeight="bold" color={getGradeColor(grade)}>
+                            {grade}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Grade
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant="h4" gutterBottom>
+                          {Math.round(totalScore)}/100
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={totalScore}
+                          sx={{
+                            height: 8,
+                            borderRadius: 1,
+                            backgroundColor: "rgba(0,0,0,0.1)",
+                            "& .MuiLinearProgress-bar": {
+                              backgroundColor: getGradeColor(grade),
+                            },
                           }}
                         />
-                      ))}
-                    </Box>
-                  </Grid>
-                </Grid>
-              ))}
-            </Box>
-            {/* Transit Section */}
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
-                <Train color={getScoreColor(layerStates.transit.score.score, 30)} />
-                <Typography>Transit Access</Typography>
-                <Typography sx={{ ml: "auto" }}>
-                  {layerStates.transit.isActive
-                    ? layerStates.transit.hasData
-                      ? renderLayerScore(layerStates.transit, 30)
-                      : "Loading..."
-                    : "Disabled"}
-                </Typography>
-              </Box>
-              {renderMetricsSection(layerStates.transit, () => (
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Metrics
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2">Number of Stations: {formatNumber(layerStates.transit.score.metrics.numberOfStations)}</Typography>
-                      <Typography variant="body2">Average Distance: {formatDistance(layerStates.transit.score.metrics.averageDistance)}</Typography>
-                      <Typography variant="body2">
-                        Transit Types: {formatNumber(Object.keys(layerStates.transit.score.metrics.stationTypes || {}).length)}
-                      </Typography>
-                      <Box sx={{ mt: 1 }}>
-                        {Object.entries(layerStates.transit.score.metrics.stationTypes || {}).map(([type, count]) => (
-                          <Chip
-                            key={type}
-                            label={`${type.replace("_", " ")}: ${count}`}
-                            size="small"
-                            sx={{
-                              mr: 0.5,
-                              mb: 0.5,
-                              textTransform: "capitalize",
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  </Grid>
-                </Grid>
-              ))}
-            </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
 
-            <Typography variant="caption" color="text.secondary" display="block" mt={2}>
-              {Object.values(activeLayers).some(Boolean)
-                ? `Based on analysis of ${Object.entries(layerStates)
-                    .filter(([_, state]) => state.isActive)
-                    .map(([key]) => key.replace(/([A-Z])/g, " $1").toLowerCase())
-                    .join(", ")}`
-                : "Enable layers to begin analysis"}
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    </Paper>
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Score Breakdown
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    {Object.entries(layerStates).map(([key, state]) => {
+                      if (!state.isActive) return null;
+                      const maxScore = scoreWeights[key];
+                      const score = state.hasData ? state.score.score : 0;
+                      const contribution = getScoreContribution(score, maxScore);
+
+                      return (
+                        <Box key={key} sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                          <Typography variant="body2">{key.charAt(0).toUpperCase() + key.slice(1)}:</Typography>
+                          <Typography variant="body2">{state.hasData ? `${Math.round(score)}/${maxScore} (${contribution}%)` : "N/A"}</Typography>
+                        </Box>
+                      );
+                    })}
+                    <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                      <Typography variant="body2" fontWeight="bold" sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <span>Total Score:</span>
+                        <span>{Math.round(totalScore)}/100</span>
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                <Box sx={{ mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
+                    <Footprints color={getScoreColor(layerStates.walkability.score.score, 30)} />
+                    <Typography>Walkability</Typography>
+                    <Typography sx={{ ml: "auto" }}>
+                      {layerStates.walkability.isActive
+                        ? layerStates.walkability.hasData
+                          ? renderLayerScore(layerStates.walkability, 30)
+                          : "Loading..."
+                        : "Disabled"}
+                    </Typography>
+                  </Box>
+                  {renderMetricsSection(layerStates.walkability, () => (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Metrics
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">Total Amenities: {formatNumber(layerStates.walkability.score.metrics.totalAmenities)}</Typography>
+                          <Typography variant="body2">
+                            Average Distance: {formatDistance(layerStates.walkability.score.metrics.averageDistance)}
+                          </Typography>
+                          <Typography variant="body2">Amenity Types: {Object.keys(layerStates.walkability.score.metrics.amenityTypes).length}</Typography>
+                        </Box>
+
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Score Breakdown
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">Amenities: {layerStates.walkability.score.metrics.scores.amenities}/15</Typography>
+                          <Typography variant="body2">Diversity: {layerStates.walkability.score.metrics.scores.diversity}/10</Typography>
+                          <Typography variant="body2">Proximity: {layerStates.walkability.score.metrics.scores.proximity}/5</Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Box>
+                {/* Air Quality Section */}
+                <Box sx={{ mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
+                    <Wind color={getScoreColor(layerStates.airQuality.score.score, 20)} />
+                    <Typography>Air Quality</Typography>
+                    <Typography sx={{ ml: "auto" }}>
+                      {layerStates.airQuality.isActive
+                        ? layerStates.airQuality.hasData
+                          ? renderLayerScore(layerStates.airQuality, 20)
+                          : "Loading..."
+                        : "Disabled"}
+                    </Typography>
+                  </Box>
+                  {renderMetricsSection(layerStates.airQuality, () => (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Metrics
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">AQI: {layerStates.airQuality.score.metrics.aqi}</Typography>
+                          <Typography variant="body2">Category: {layerStates.airQuality.score.metrics.category}</Typography>
+                          <Typography variant="body2">Dominant Pollutant: {layerStates.airQuality.score.metrics.dominantPollutant}</Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Box>
+                {/* Solar Score Section */}
+                <Box sx={{ mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
+                    <WbSunny color={getScoreColor(layerStates.solar.score.score, 40)} />
+                    <Typography>Solar Potential</Typography>
+                    <Typography sx={{ ml: "auto" }}>
+                      {layerStates.solar.isActive ? (layerStates.solar.hasData ? renderLayerScore(layerStates.solar, 40) : "Loading...") : "Disabled"}
+                    </Typography>
+                  </Box>
+                  {renderMetricsSection(layerStates.solar, () => (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Metrics
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">
+                            Average Sunshine: {formatNumber(layerStates.solar.score.metrics.averageSunshine)} kWh/m²/year
+                          </Typography>
+                          <Typography variant="body2">Total Roof Area: {formatNumber(layerStates.solar.score.metrics.totalArea)} m²</Typography>
+                          <Typography variant="body2">
+                            Possible Configurations: {formatNumber(layerStates.solar.score.metrics.possibleConfigurations)}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Box>
+                {/* Green Spaces Section */}
+                <Box sx={{ mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
+                    <Park color={getScoreColor(layerStates.greenSpace.score.score, 30)} />
+                    <Typography>Green Spaces</Typography>
+                    <Typography sx={{ ml: "auto" }}>
+                      {layerStates.greenSpace.isActive
+                        ? layerStates.greenSpace.hasData
+                          ? renderLayerScore(layerStates.greenSpace, 30)
+                          : "Loading..."
+                        : "Disabled"}
+                    </Typography>
+                  </Box>
+                  {renderMetricsSection(layerStates.greenSpace, () => (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Metrics
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">Number of Spaces: {formatNumber(layerStates.greenSpace.score.metrics.numberOfSpaces)}</Typography>
+                          <Typography variant="body2">
+                            Average Distance: {formatDistance(layerStates.greenSpace.score.metrics.averageDistance)}
+                          </Typography>
+                          <Typography variant="body2">
+                            Average Rating: {(layerStates.greenSpace.score.metrics.averageRating || 0).toFixed(1)} ★
+                          </Typography>
+                          <Typography variant="body2">Total Reviews: {formatNumber(layerStates.greenSpace.score.metrics.totalReviews)}</Typography>
+                          <Typography variant="body2">Large Parks: {layerStates.greenSpace.score.metrics.hasLargeParks ? "Yes" : "No"}</Typography>
+                        </Box>
+
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Score Breakdown
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">Quantity: {layerStates.greenSpace.score.metrics.scores.quantity}/10</Typography>
+                          <Typography variant="body2">Proximity: {layerStates.greenSpace.score.metrics.scores.proximity}/10</Typography>
+                          <Typography variant="body2">Quality: {layerStates.greenSpace.score.metrics.scores.quality}/10</Typography>
+                        </Box>
+
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Park Types
+                        </Typography>
+                        <Box sx={{ mt: 1 }}>
+                          {Object.entries(layerStates.greenSpace.score.metrics.parkTypes || {}).map(([type, count]) => (
+                            <Chip
+                              key={type}
+                              label={`${type.replace("_", " ")}: ${count}`}
+                              size="small"
+                              sx={{
+                                mr: 0.5,
+                                mb: 0.5,
+                                textTransform: "capitalize",
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Box>
+                {/* Transit Section */}
+                <Box sx={{ mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", mb: 1 }}>
+                    <Train color={getScoreColor(layerStates.transit.score.score, 30)} />
+                    <Typography>Transit Access</Typography>
+                    <Typography sx={{ ml: "auto" }}>
+                      {layerStates.transit.isActive
+                        ? layerStates.transit.hasData
+                          ? renderLayerScore(layerStates.transit, 30)
+                          : "Loading..."
+                        : "Disabled"}
+                    </Typography>
+                  </Box>
+                  {renderMetricsSection(layerStates.transit, () => (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Metrics
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2">Number of Stations: {formatNumber(layerStates.transit.score.metrics.numberOfStations)}</Typography>
+                          <Typography variant="body2">Average Distance: {formatDistance(layerStates.transit.score.metrics.averageDistance)}</Typography>
+                          <Typography variant="body2">
+                            Transit Types: {formatNumber(Object.keys(layerStates.transit.score.metrics.stationTypes || {}).length)}
+                          </Typography>
+                          <Box sx={{ mt: 1 }}>
+                            {Object.entries(layerStates.transit.score.metrics.stationTypes || {}).map(([type, count]) => (
+                              <Chip
+                                key={type}
+                                label={`${type.replace("_", " ")}: ${count}`}
+                                size="small"
+                                sx={{
+                                  mr: 0.5,
+                                  mb: 0.5,
+                                  textTransform: "capitalize",
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Box>
+
+                <Typography variant="caption" color="text.secondary" display="block" mt={2}>
+                  {Object.values(activeLayers).some(Boolean)
+                    ? `Based on analysis of ${Object.entries(layerStates)
+                        .filter(([_, state]) => state.isActive)
+                        .map(([key]) => key.replace(/([A-Z])/g, " $1").toLowerCase())
+                        .join(", ")}`
+                    : "Enable layers to begin analysis"}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Paper>
+      )}
+    </>
   );
 };
 

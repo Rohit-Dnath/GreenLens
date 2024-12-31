@@ -62,27 +62,27 @@ const LayerControlPanel = ({ activeLayers, onToggleLayer, onSelectPanel, selecte
       elevation={3}
       sx={{
         position: "absolute",
-bottom: 20,
-right: 20,
-width: 300,
-zIndex: 1000,
-background: "linear-gradient(135deg, rgba(34, 193, 195, 0.8), rgba(253, 187, 45, 0.8))",
-backdropFilter: "blur(10px)",
-borderRadius: "16px",
-boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
-padding: "16px",
-border: "2px solid rgba(255, 255, 255, 0.5)", // Distinct white border for contrast
-outline: "3px solid rgba(34, 193, 195, 0.3)", // Subtle glow effect for prominence
-color: "#ffffff", // Text color for readability
-fontWeight: "bold",
-textAlign: "center",
-transition: "transform 0.3s ease, box-shadow 0.3s ease, outline 0.3s ease",
-":hover": {
-  transform: "scale(1.04)",
-  boxShadow: "0 12px 36px rgba(0, 0, 0, 0.25)",
-  outline: "3px solid rgba(253, 187, 45, 0.5)", // Glow changes to match hover gradient
+        top: 20,
+        right: 20,
+        width: 300,
+        zIndex: 1000,
+        background: "linear-gradient(135deg, rgba(34, 193, 195, 0.8), rgba(253, 187, 45, 0.8))",
+        backdropFilter: "blur(10px)",
+        borderRadius: "16px",
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+        padding: "16px",
+        border: "2px solid rgba(255, 255, 255, 0.5)", // Distinct white border for contrast
+        outline: "3px solid rgba(34, 193, 195, 0.3)", // Subtle glow effect for prominence
+        color: "#ffffff", // Text color for readability
+        fontWeight: "bold",
+        textAlign: "center",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease, outline 0.3s ease",
+        ":hover": {
+          transform: "scale(1.04)",
+          boxShadow: "0 12px 36px rgba(0, 0, 0, 0.25)",
+          outline: "3px solid rgba(253, 187, 45, 0.5)", // Glow changes to match hover gradient
 
-},
+        },
 
       }}
     >
